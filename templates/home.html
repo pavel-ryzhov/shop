@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+{% block content %}
+    {% for product in products %}
+        <div class="card">
+            <div class="card-header">
+                <b><span class="font-weight-bold">{{ product.name }}</span></b>
+            </div>
+            <div class="card-body">
+                <p>{{ product.description }}</p>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-between">
+                    <p>{{ product.price }} $</p>
+                    {% if user.is_authenticated %}
+                        <div class="d-flex justify-content-start">
+                            <button class="btn btn-outline-secondary btn-sm btn-add" data-product-id="{{ product.id }}">
+                                Add to Cart
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <br/>
+    {% endfor %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const addToCart = async (productId) => {
+                await fetch('cart/add_item/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({product_id: productId})
+                });
+            };
+            document.querySelectorAll('.btn-add').forEach(button => {
+                button.addEventListener('click', () => {
+                    addToCart(button.dataset.productId);
+                });
+            });
+        });
+    </script>
+{% endblock %}

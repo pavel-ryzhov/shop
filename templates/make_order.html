@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+    {% if is_empty %}
+        <div class="jumbotron">
+            <h1 class="display-4">Your cart is empty!</h1>
+            <a href="{% url 'home' %}" class="btn btn-success">To main page</a>
+        </div>
+    {% else %}
+        {% for cart_item in cart_items %}
+            <div class="card-header d-flex justify-content-between">
+                <div class="d-flex justify-content-start">
+                    <b><span class="font-weight-bold">{{ cart_item.product.name }}</span></b>
+                    <b><span class="font-weight-bold ms-2">×</span></b>
+                    <b><span class="font-weight-bold ms-2"> {{ cart_item.quantity }}</span></b>
+                </div>
+                <b><span class="font-weight-bold">{{ cart_item.total_price }} $</span></b>
+            </div>
+            <br/>
+        {% endfor %}
+        <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-start ms-3">
+                <b>
+                    <span class="font-weight-bold">Total price:</span>
+                    <span class="font-weight-bold ms-2" id="cart-total-price">{{ total_price }}</span>
+                    <span class="font-weight-bold ms-1">$</span>
+                </b>
+            </div>
+            <div class="d-flex justify-content-end me-3">
+                <a class="btn btn-danger me-2" href="{% url "cart" %}">Cancel</a>
+                <button class="btn btn-success" id="order">Order</button>
+            </div>
+        </div>
+    {% endif %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('order').addEventListener('click', async function () {
+                const response = await fetch('order/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                });
+                if (response.ok) {
+                    window.location.href = "/home";
+                }
+            });
+        });
+    </script>
+{% endblock %}

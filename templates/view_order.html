@@ -1,0 +1,17 @@
+{% extends 'admin_base.html' %}
+{% block allowed_content %}
+    <div class="jumbotron">
+        <h1 class="display-4">{{ order.user.username }}'s order</h1>
+    </div>
+    {% for item in order.items.all %}
+        <div class="card-header d-flex justify-content-between">
+            <b><span class="font-weight-bold">{{ item.product.name }} × {{ item.quantity }}</span></b>
+            <b><span class="font-weight-bold">{{ item.total_price }} $</span></b>
+        </div>
+        <br/>
+    {% endfor %}
+    <div class="d-flex justify-content-between">
+        <b><span class="font-weight-bold ms-3">Total price:</span></b>
+        <b><span class="font-weight-bold me-3">{{ order.total_price }} $</span></b>
+    </div>
+{% endblock %}

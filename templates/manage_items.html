@@ -1,0 +1,45 @@
+{% extends 'admin_base.html' %}
+{% block allowed_content %}
+    <div class="jumbotron">
+        <h1 class="display-4">Manage {{ type }}</h1>
+    </div>
+    {% for i in object_list %}
+        <div id="{{ i.id }}">
+            <div class="card-header d-flex justify-content-between">
+                <div class="d-flex justify-content-start">
+                    <b><span class="font-weight-bold">{{ i }}</span></b>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <a href="{{ i.pk }}" class="btn btn-primary">View</a>
+                    <button class="btn btn-danger ms-2 btn-remove" data-item-id="{{ i.id }}">Remove</button>
+                </div>
+            </div>
+            <br/>
+        </div>
+    {% endfor %}
+    {% if type == "products" %}
+        <a href="{% url "add_product" %}" class="btn btn-success">Add</a>
+    {% endif %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const remove = async (itemId) => {
+                const response = await fetch('remove_{{ type }}/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({item_id: itemId})
+                });
+                if (response.ok) {
+                    document.getElementById(itemId).remove()
+                }
+            };
+            document.querySelectorAll('.btn-remove').forEach(button => {
+                button.addEventListener('click', () => {
+                    remove(button.dataset.itemId);
+                });
+            });
+        });
+    </script>
+{% endblock %}

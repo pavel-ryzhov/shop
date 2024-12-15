@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block content %}
+    {% if is_empty %}
+        <div class="jumbotron">
+            <h1 class="display-4">Your cart is empty!</h1>
+            <a href="{% url 'home' %}" class="btn btn-success">To main page</a>
+        </div>
+    {% else %}
+        {% for cart_item in cart_items %}
+            <div id="{{ cart_item.id }}-card">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between">
+                        <div class="d-flex justify-content-start">
+                            <b><span class="font-weight-bold">{{ cart_item.product.name }}</span></b>
+                            <b><span class="font-weight-bold ms-2">×</span></b>
+                            <b><span class="font-weight-bold ms-2" id="{{ cart_item.id }}-quantity0"> {{ cart_item.quantity }}</span></b>
+                        </div>
+                        <button class="btn btn-danger btn-remove" data-item-id="{{ cart_item.id }}">Remove</button>
+                    </div>
+                    <div class="card-body">
+                        <p>{{ cart_item.product.description }}</p>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <div class="d-flex justify-content-start">
+                        <span class="font-weight-bold"
+                              id="{{ cart_item.id }}-item-total-price">{{ cart_item.total_price }}</span>
+                                <span class="font-weight-bold ms-1">$</span>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <b>
+                                    <button class="btn btn-outline-secondary font-monospace me-2 btn-decrease"
+                                            data-item-id="{{ cart_item.id }}">-
+                                    </button>
+                                    <span class="font-weight-bold"
+                                          id="{{ cart_item.id }}-quantity">{{ cart_item.quantity }}</span>
+                                    <button class="btn btn-outline-secondary font-monospace ms-2 btn-increase"
+                                            data-item-id="{{ cart_item.id }}">+
+                                    </button>
+                                </b>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br/>
+            </div>
+        {% endfor %}
+        <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-start">
+                <b>
+                    <span class="font-weight-bold">Total price:</span>
+                    <span class="font-weight-bold ms-2" id="cart-total-price">{{ total_price }}</span>
+                    <span class="font-weight-bold ms-1">$</span>
+                </b>
+            </div>
+            <a href="{% url 'make_order' %}" class="btn btn-primary">Order</a>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const updateItem = async (itemId, response) => {
+                    if (response.ok) {
+                        const data = await response.json()
+                        document.getElementById(itemId + "-quantity").textContent = data.quantity;
+                        document.getElementById(itemId + "-quantity0").textContent = data.quantity;
+                        document.getElementById(itemId + "-item-total-price").textContent = data.item_total_price;
+                        document.getElementById("cart-total-price").textContent = data.cart_total_price;
+                    }
+                }
+                const increase = async (itemId) => {
+                    const response = await fetch('increase_quantity/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({item_id: itemId})
+                    });
+                    await updateItem(itemId, response);
+                };
+                const remove = async (itemId) => {
+                    const response = await fetch('remove_item/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({item_id: itemId})
+                    });
+                    if (response.ok) {
+                        document.getElementById("cart-total-price").textContent = (await response.json()).cart_total_price;
+                        document.getElementById(itemId + "-card").remove()
+                    }
+                };
+                const decrease = async (itemId) => {
+                    const response = await fetch('decrease_quantity/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({item_id: itemId})
+                    });
+                    await updateItem(itemId, response);
+                };
+                document.querySelectorAll('.btn-increase').forEach(button => {
+                    button.addEventListener('click', () => {
+                        increase(button.dataset.itemId);
+                    });
+                });
+                document.querySelectorAll('.btn-decrease').forEach(button => {
+                    button.addEventListener('click', () => {
+                        decrease(button.dataset.itemId);
+                    });
+                });
+                document.querySelectorAll('.btn-remove').forEach(button => {
+                    button.addEventListener('click', () => {
+                        remove(button.dataset.itemId);
+                    });
+                });
+            });
+        </script>
+    {% endif %}
+{% endblock %}

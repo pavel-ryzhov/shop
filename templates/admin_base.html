@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Admin{% endblock %}
+{% block content %}
+    {% if user.is_admin %}
+        {% block allowed_content %}
+        {% endblock %}
+    {% else %}
+        <div class="jumbotron">
+            <h1 class="display-4">Permission denied</h1>
+            <a href="{% url 'home' %}" class="btn btn-success">To main page</a>
+        </div>
+    {% endif %}
+{% endblock %}

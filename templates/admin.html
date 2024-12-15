@@ -1,0 +1,12 @@
+{% extends 'admin_base.html' %}
+{% block title %}Admin{% endblock %}
+{% block allowed_content %}
+    <div class="jumbotron">
+        <h1 class="display-4">Admin page</h1>
+        <ul>
+            <li><a href="{% url "manage_users" %}">Users</a></li>
+            <li><a href="{% url "manage_products" %}">Products</a></li>
+            <li><a href="{% url "manage_orders" %}">Orders</a></li>
+        </ul>
+    </div>
+{% endblock %}
